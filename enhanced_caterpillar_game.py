@@ -1,13 +1,14 @@
 import random
 import turtle as t
 import time
+from pygame import mixer
 
 class CaterpillarGame:
     def __init__(self):
         # Set up the screen
         self.screen = t.Screen()
         self.screen.setup(700, 700)
-        self.screen.bgcolor('forestgreen')
+        self.screen.bgcolor('black')
         self.screen.title('Caterpillar Game')
         self.screen.tracer(0)  # Turn off automatic animation
         
@@ -33,6 +34,7 @@ class CaterpillarGame:
     
     def _create_caterpillar(self):
         """Create the caterpillar turtle."""
+       
         self.caterpillar = t.Turtle()
         self.caterpillar.shape('square')
         self.caterpillar.color('chocolate4', 'chocolate')
@@ -46,6 +48,7 @@ class CaterpillarGame:
     
     def _create_leaf(self):
         """Create the leaf turtle."""
+
         self.leaf = t.Turtle()
         leaf_shape = ((0, 0), (14, 2), (18, 6), (20, 20), (6, 18), (2, 14))
         t.register_shape('leaf', leaf_shape)
@@ -75,6 +78,39 @@ class CaterpillarGame:
         self.instructions.hideturtle()
         self.instructions.penup()
         self.instructions.color('white')
+    
+    def start_game(self):
+        """Start or restart the game."""
+        if self.game_started:
+            return
+        
+        # Clear any existing text
+        self.text_turtle.clear()
+        self.instructions.clear()
+        
+        # Reset game state
+        self.game_started = True
+        self.score = 0
+        
+        # Reset and show caterpillar
+        self.caterpillar.goto(0, 0)
+        self.caterpillar.setheading(0)
+        self.caterpillar.showturtle()
+        
+        # Clear old segments and create initial ones
+        for segment in self.segments:
+            segment.hideturtle()
+        self.segments.clear()
+        
+        for _ in range(2):  # Create 2 initial segments (plus head = 3 total)
+            self.grow_caterpillar()
+        
+        # Place leaf and update score display
+        self.place_leaf()
+        self.display_score()
+        
+        # Start game loop
+        self.game_loop()
     
     def _setup_keys(self):
         """Set up key bindings."""
@@ -107,7 +143,7 @@ class CaterpillarGame:
         ]
         for i, line in enumerate(instructions_text):
             self.instructions.goto(0, 20 - i * 30)
-            self.instructions.write(line, align='center', font=('Arial', 16))
+            self.instructions.write(line, align='center', font=('Arial', 16)) # type: ignore
     
     def set_easy_difficulty(self):
         """Set game difficulty to easy."""
@@ -175,16 +211,23 @@ class CaterpillarGame:
                                font=('Arial', 16, 'bold'))
     
     def place_leaf(self):
-        """Place the leaf at a random position."""
+        try:
+            mixer.init()
+            sound = mixer.Sound('/Users/premg/Library/CloudStorage/OneDrive-Personal/711127__xiko__retro-collection-1.wav')
+            sound.play()
+        except Exception:
+            # Silently handle sound errors to avoid interrupting gameplay
+            pass
+            
         self.leaf.hideturtle()
         margin = 200  # Keep away from edges
         max_x = int(self.screen.window_width() / 2) - margin
         max_y = int(self.screen.window_height() / 2) - margin
-        
+            
         self.leaf.setx(random.randint(-max_x, max_x))
         self.leaf.sety(random.randint(-max_y, max_y))
         self.leaf.showturtle()
-    
+
     def grow_caterpillar(self):
         """Add a new segment to the caterpillar."""
         # Create a new segment
@@ -273,42 +316,10 @@ class CaterpillarGame:
         
         self.text_turtle.goto(0, -50)
         self.text_turtle.write('Press SPACE to restart', align='center', 
-                              font=('Arial', 20))
+                              font=('Arial', 20)) # type: ignore
         
         self.display_score()
-    
-    def start_game(self):
-        """Start or restart the game."""
-        if self.game_started:
-            return
-        
-        # Clear any existing text
-        self.text_turtle.clear()
-        self.instructions.clear()
-        
-        # Reset game state
-        self.game_started = True
-        self.score = 0
-        
-        # Reset and show caterpillar
-        self.caterpillar.goto(0, 0)
-        self.caterpillar.setheading(0)
-        self.caterpillar.showturtle()
-        
-        # Clear old segments and create initial ones
-        for segment in self.segments:
-            segment.hideturtle()
-        self.segments.clear()
-        
-        for _ in range(2):  # Create 2 initial segments (plus head = 3 total)
-            self.grow_caterpillar()
-        
-        # Place leaf and update score display
-        self.place_leaf()
-        self.display_score()
-        
-        # Start game loop
-        self.game_loop()
+        self.reset_game()
     
     def game_loop(self):
         """Main game loop."""
@@ -372,7 +383,7 @@ class CaterpillarGame:
         if self.game_started and not self.game_paused:
             if self.caterpillar.heading() != 180:  # Not going left
                 self.caterpillar.setheading(0)
-    
+    # start game
     def run(self):
         """Start the game."""
         self.show_welcome_screen()
