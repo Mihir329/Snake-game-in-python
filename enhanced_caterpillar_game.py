@@ -2,6 +2,21 @@ import random
 import turtle as t
 import time
 from pygame import mixer
+import tkinter as tk
+import os
+
+# Set up the dock icon (macOS only)
+if os.name == 'posix':  # macOS
+    try:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        icon_path = os.path.join(current_dir, "snake_image_cool.png")
+        if os.path.exists(icon_path):
+            root = tk.Tk()
+            root.withdraw()
+            img = tk.PhotoImage(file=icon_path)
+            root.iconphoto(True, img)
+    except Exception as e:
+        print("Could not set dock icon:", e)
 
 class CaterpillarGame:
     def __init__(self):
@@ -213,7 +228,7 @@ class CaterpillarGame:
     def place_leaf(self):
         try:
             mixer.init()
-            sound = mixer.Sound('/Users/premg/Library/CloudStorage/OneDrive-Personal/711127__xiko__retro-collection-1.wav')
+            sound = mixer.Sound('711127__xiko__retro-collection-1.wav')
             sound.play()
         except Exception:
             # Silently handle sound errors to avoid interrupting gameplay
